@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 var corsOptions = {
-  origin: "http://localhost:8081"
+  origin: "http://localhost:3001"
 };
 app.use(cors(corsOptions));
 // parse requests of content-type - application/json
@@ -20,7 +20,13 @@ db.sequelize.sync();
 app.get("/", (req, res) => {
   res.json({ message: "Welcome to bezkoder application." });
 });
-require("./app/routes/tutorial.routes")(app);
+require("./app/routes/user.routes.js")(app);
+require("./app/routes/survey.routes.js")(app);
+require("./app/routes/session.routes.js")(app);
+require("./app/routes/surveyparticipants.routes.js")(app);
+require("./app/routes/surveyquestions.routes.js")(app);
+require("./app/routes/surveyquestionanswers.routes.js")(app);
+require("./app/routes/surveyparticipantanswers.routes.js")(app);
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
