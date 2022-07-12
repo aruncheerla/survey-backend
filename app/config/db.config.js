@@ -1,8 +1,8 @@
 module.exports = {
-  HOST: "localhost",
-  USER: "root",
-  PASSWORD: "mysql@root",
-  DB: "survey_db",
+  HOST: "survey-db.cekydkanjmcc.us-west-1.rds.amazonaws.com",
+  USER: "admin",
+  PASSWORD: "surveyadmin@root",
+  DB: "survey_details",
   dialect: "mysql",
   pool: {
     max: 5,
