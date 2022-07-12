@@ -1,155 +1,61 @@
 const db = require("../models");
 const User = db.user;
 const Op = db.Sequelize.Op;
-// Create and Save a new Artist
-exports.create = (req, res) => {
-  // Validate request
-  if (!req.body.userEmail) {
-    res.status(400).send({
-      message: "Content can not be empty!"
-    });
-    return;
-  }
-  // Create a Artist
-  const user = {
-    user_Email: req.body.userEmail,
-    user_FirstName: req.body.userFirstname,
-    user_LasttName: req.body.userLastname,
-    user_Password: req.body.userPassword
-  };
-  // Save Artist in the database
-  /* Artist.findOne({where: {artist_name:req.body.artistName}})
-  .then(data => {
-    if(data != undefined){
-      res.status(409).send({
-        message: "Artist already exists. Please enter valid artist details"
-      });
-    }else{
-      Artist.create(artist)
-    .then(data => {
-      res.send(data);
-    })
-    }
-  })
-  .catch(err => {
-    res.status(500).send({
-      message:
-        err.message || "Some error occurred while creating the Artist."
-    });
-  });
-};
-// Retrieve all Artists from the database.
-exports.findAll = (req, res) => {
-  Artist.findAll({ include: ["album"] })
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving artists"
-      });
-    });
-};
-// Find a single Artist with an id
-exports.findOne = (req, res) => {
-  const id = req.params.id;
-  Artist.findByPk(id,{ include: ["album"] })
-    .then(data => {
-      if (data) {
-        res.send(data);
-      } else {
-        res.status(404).send({
-          message: `Cannot find Artist with id=${id}.`
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error retrieving Artist with id=" + id
-      });
-    });
-};
-// Find Artist with artist name
-exports.findAllArtist = (req, res) => {
-  const artist_name = req.params.artistName;
-  var condition = artist_name ? {
-    artist_name: {
-      [Op.like]: `%${artist_name}%`
-    }
-  } : null;
+var mysql = require('mysql');
+const util = require('util');
 
-  Artist.findAll({ where: condition })
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving artist."
-      });
-    });
+var con = mysql.createConnection({
+  host: "survey-db.cekydkanjmcc.us-west-1.rds.amazonaws.com",
+  user: "admin",
+  password: "surveyadmin",
+  database: "survey_details"
+});
+
+const query = util.promisify(con.query).bind(con);
+
+// Create and Save a new Artist
+const create = async (req, res) => {
+  const { email, password, fullName, dataOfBirth, createdBy } = req.body;
+
+  try {
+    const todayDate = new Date();
+
+    const insertRecord = await query(`INSERT into survey_details.user_details
+    (email,password,full_name,date_of_birth,created_by,created_at)values
+    ('${email}','${password}','${fullName}','${dataOfBirth}','${createdBy}','${todayDate}')`);
+
+    if (insertRecord.affectedRows === 1) {
+      return res.send("Sign up successful");
+    }
+    return res.send("something went wrong");
+
+  } catch (error) {
+    throw error;
+  }
+
+
 };
-// Update a Artist by the id in the request
-exports.update = (req, res) => {
-  const id = req.params.id;
-  Artist.update(req.body, {
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "Artist was updated successfully."
-        });
-      } else {
-        res.send({
-          message: `Cannot update Artist with id=${id}. Maybe Artist was not found or req.body is empty!`
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error updating Artist with id=" + id
-      });
-    });
+
+const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const result = await query(`SELECT * from survey_details.user_details where email='${email}' and password='${password}'`);
+    console.log("result",result);
+    if (result.length !==0) {
+      return res.send({ resultCode: 200,resultMessage:"User details", responseData: result[0] });
+
+    }
+    return res.send({ resultCode: 201,resultMessage:"InValid user"});
+
+  } catch (error) {
+    console.log("error", error);
+    throw error;
+  }
+}
+
+
+module.exports = {
+  create,
+  login
 };
-// Delete a Artist with the specified id in the request
-exports.delete = (req, res) => {
-  const id = req.params.id;
-  Artist.destroy({
-    where: { id: id }
-  })
-    .then(num => {
-      if (num == 1) {
-        res.send({
-          message: "Artist was deleted successfully!"
-        });
-      } else {
-        res.send({
-          message: `Cannot delete Artist with id=${id}. Maybe Artist was not found!`
-        });
-      }
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Could not delete Artist with id=" + id
-      });
-    });
-};
-// Delete all Artist from the database.
-exports.deleteAll = (req, res) => {
-  Artist.destroy({
-    where: {},
-    truncate: false
-  })
-    .then(nums => {
-      res.send({ message: `${nums} Artist were deleted successfully!` });
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while removing all artists."
-      });
-    });*/
- };
 
