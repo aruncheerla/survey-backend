@@ -10,7 +10,7 @@ module.exports = () => {
     const router = Router({ mergeParams: true });
     
     router.route('/createUser').post(controller.create);
-    router.route('/login').post(controller.login);
+    router.route('/login').get(controller.login);
 
     return router;
 };

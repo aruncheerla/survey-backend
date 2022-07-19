@@ -14,21 +14,30 @@ var con = mysql.createConnection({
 const query = util.promisify(con.query).bind(con);
 
 // Create and Save a new Artist
-const createQuestion = async (req, res) => {
-  const { surveyId, description, questionType, questionName, optionDetails, answer } = req.body;
+exports.createQuestion = async (req, res) => {
+
+  const { surveyId, surveyQuestionType, surveyQuestionText, surveyQuestionOptionDetails } = req.body;
 
   try {
-    console.log("here in create que");
     const todayDate = new Date();
+    const month = todayDate.getMonth()
+    const year = todayDate.getFullYear();
+    const min = todayDate.getMinutes()
+    const hours = todayDate.getHours()
+    const seconds = todayDate.getSeconds()
+    const day = todayDate.getDay()
+    const finalDate = year + '-' + month + '-' + day + ' ' + hours + ':' + min + ':' + seconds;
 
-    const insertRecord = await query(`INSERT into survey_details.question_details
-    (survey_id,description,question_type,question_name,option_details,answer)values
-    ('${surveyId}','${description}','${questionType}','${questionName}','${optionDetails}','${answer}') `);
+    console.log(`INSERT into survey_details.surveyquestions
+    (surveyId,surveyquestion_type,surveyquestion_text,surveyquestion_optiondetails,createdAt)values
+    ('${surveyId}','${surveyQuestionType}','${surveyQuestionText}','${surveyQuestionOptionDetails}','${finalDate}'`);
 
-    console.log("insertRecord", insertRecord);
+    const insertRecord = await query(`INSERT into survey_details.surveyquestions
+    (surveyId,surveyquestion_type,surveyquestion_text,surveyquestion_optiondetails,createdAt)values
+    ('${surveyId}','${surveyQuestionType}','${surveyQuestionText}','${surveyQuestionOptionDetails}','${finalDate}') `);
 
     if (insertRecord.affectedRows === 1) {
-      return res.send({ resultCode: 200, resultMessage: "Added Question", questionId: insertRecord.insertId });
+      return res.send({ resultCode: 200, resultMessage: "Added survey", responseData: { questionId: insertRecord.insertId } });
     }
     return res.send({ resultCode: 201, resultMessage: "Something went wrong" });
 
@@ -37,25 +46,73 @@ const createQuestion = async (req, res) => {
   }
 };
 
-const questionListBySurveyId = async (req, res) => {
-  const { surveyId } = req.body;
+exports.questionListBySurveyId = async (req, res) => {
+  const { surveyId } = req.query;
 
   try {
-    const result = await query(`SELECT * from survey_details.question_details where survey_id='${surveyId}'`);
-    console.log("result", result);
+    const result = await query(`SELECT * from survey_details.surveyquestions where surveyId='${surveyId}'`);
     if (result.length !== 0) {
-      return res.send({ resultCode: 200, resultMessage: "Question details", responseData: result });
+      return res.send({ resultCode: 200, resultMessage: "User details", responseData: result });
 
     }
-    return res.send({ resultCode: 201, resultMessage: "InValid Survey" });
+    return res.send({ resultCode: 201, resultMessage: "InValid Survey Id" });
 
   } catch (error) {
     throw error;
   }
 };
 
-module.exports = {
-  createQuestion,
-  questionListBySurveyId
+exports.deleteQuestionById = async (req, res) => {
+  const { questionId } = req.body;
+
+  try {
+
+    await query(`delete from survey_details.surveyquestionanswers where surveyquestionsId =${questionId}`);
+
+    const deleteQuestion = await query(`delete from survey_details.surveyquestions where id =${questionId}`);
+
+    if (deleteQuestion.affectedRows !== 0) {
+      return res.send({ resultCode: 200, resultMessage: "Question Deleted" });
+    }
+    return res.send({ resultCode: 201, resultMessage: "Question not found" });
+
+  } catch (error) {
+    throw error;
+  }
 };
+
+exports.bulkCreateSurveyQuestion = async (req, res) => {
+
+  const { surveyId,questionDetails } = req.body;
+
+  try {
+    const todayDate = new Date();
+    const newDate = new Date(todayDate);
+    const month = todayDate.getMonth()
+    const year = todayDate.getFullYear();
+    const min = todayDate.getMinutes()
+    const hours = todayDate.getHours()
+    const seconds = todayDate.getSeconds()
+    const day = todayDate.getDay()
+    const finalDate = year + '-' + month + '-' + day + ' ' + hours + ':' + min + ':' + seconds
+
+    questionDetails.map(async item => {
+      try {
+        await query(`INSERT into survey_details.surveyquestions
+    (surveyId,surveyquestion_type,surveyquestion_text,surveyquestion_optiondetails,createdAt)values
+    (${surveyId},'${item.surveyQuestionType}','${item.surveyQuestionText}','${item.surveyQuestionOptionDetails}','${finalDate}') `);
+
+      } catch (error) {
+        return res.send(error);
+      }
+    });
+
+    return res.send({ resultCode: 200, resultMessage: "Added Questions" });
+
+  } catch (error) {
+    throw error;
+  }
+
+};
+
 

@@ -13,19 +13,33 @@ var con = mysql.createConnection({
 
 const query = util.promisify(con.query).bind(con);
 
-// Create and Save a new Artist
-const create = async (req, res) => {
-  const { email, password, fullName, dataOfBirth, createdBy } = req.body;
+
+exports.create = async (req, res) => {
+  const { userEmail, userPassword, userFirstName, userLastName } = req.body;
 
   try {
     const todayDate = new Date();
+    const newDate=new Date(todayDate);
+    const month =todayDate.getMonth()
+    const year=todayDate.getFullYear();
+    const min=todayDate.getMinutes()
+    const  hours=todayDate.getHours()
+    const  seconds=todayDate.getSeconds()
+    const day=todayDate.getDay()
+    const finalDate =year+'-'+month+'-'+day+' '+hours+':'+min+':'+seconds
+    const email=userEmail.toLowerCase();
 
-    const insertRecord = await query(`INSERT into survey_details.user_details
-    (email,password,full_name,date_of_birth,created_by,created_at)values
-    ('${email}','${password}','${fullName}','${dataOfBirth}','${createdBy}','${todayDate}')`);
+    const checkEmailExistance = await query(`SELECT * from survey_details.users where user_Email='${email}'`);
+    
+    if (checkEmailExistance.length !==0) {
+      return res.send({ resultCode: 201,resultMessage:`Email Id ${userEmail} is already exist,Please use another mail id` });
+    }
+    const insertRecord = await query(`INSERT into survey_details.users
+    (user_Email,user_Password,user_Firstname,user_Lastname,createdAt,updatedAt)values
+    ('${email}','${userPassword}','${userFirstName}','${userLastName}','${finalDate}','${finalDate}')`);
 
     if (insertRecord.affectedRows === 1) {
-      return res.send("Sign up successful");
+      return res.send({ resultCode: 200,resultMessage:"Sign up Successful", responseData:{userId: insertRecord.insertId }});
     }
     return res.send("something went wrong");
 
@@ -33,16 +47,15 @@ const create = async (req, res) => {
     throw error;
   }
 
+}
 
-};
+exports.login = async (req, res) => {
+  const { userEmail, userPassword } = req.query;
 
-const login = async (req, res) => {
-  const { email, password } = req.body;
   try {
-    const result = await query(`SELECT * from survey_details.user_details where email='${email}' and password='${password}'`);
-    console.log("result",result);
+    const result = await query(`SELECT * from survey_details.users where user_Email='${userEmail}' and user_Password='${userPassword}'`);
     if (result.length !==0) {
-      return res.send({ resultCode: 200,resultMessage:"User details", responseData: result[0] });
+      return res.send({ resultCode: 200,resultMessage:"User details", responseData: result });
 
     }
     return res.send({ resultCode: 201,resultMessage:"InValid user"});
@@ -52,10 +65,3 @@ const login = async (req, res) => {
     throw error;
   }
 }
-
-
-module.exports = {
-  create,
-  login
-};
-

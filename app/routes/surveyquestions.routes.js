@@ -7,7 +7,10 @@ module.exports = () => {
     const router = Router({ mergeParams: true });
     
     router.route('/createQuestion').post(controller.createQuestion);
-    router.route('/questionListBySurveyId').post(controller.questionListBySurveyId);
+    router.route('/questionListBySurveyId').get(controller.questionListBySurveyId); 
+    router.route('/deleteQuestionById').delete(controller.deleteQuestionById);
+    router.route('/bulkCreateSurveyQuestion').post(controller.bulkCreateSurveyQuestion);
+
 
     // router.route('/login').post(controller.login);
 
