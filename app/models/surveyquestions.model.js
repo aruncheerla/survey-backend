@@ -5,7 +5,11 @@ module.exports = (sequelize, Sequelize) => {
       },
       surveyquestion_text: {
         type: Sequelize.STRING
+      },
+      surveyquestion_optiondetails: {
+        type: Sequelize.STRING
       }
+
     });
     return Surveyquestions;
   };

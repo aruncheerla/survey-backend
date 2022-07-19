@@ -1,5 +1,10 @@
-module.exports = app => {
-    const surveyquestionanswers = require("../controllers/surveyparticipantanswers.controller.js");
-    var router = require("express").Router();
-    app.use('/api/surveyparticipantanswers', router);
-  };
+const Router = require('express-promise-router');
+
+const controller = require('../controllers/surveyparticipantanswers.controller.js')
+
+module.exports = () => {
+    const router = Router({ mergeParams: true });
+    
+    router.route('/createSurveyParticipantAns').post(controller.createSurveyParticipantAns);
+    return router;
+};
