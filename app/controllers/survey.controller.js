@@ -50,13 +50,32 @@ exports.createSurvey = async (req, res) => {
 };
 
 exports.surveyList = async (req, res) => {
+  const { userId } = req.query;
   try {
-    const result = await query(`SELECT * from survey_details.surveys`);
-    if (result.length !== 0) {
-      return res.send({ resultCode: 200, resultMessage: "Survey details", responseData: result });
+
+    const userRole = await query(`SELECT user_role from survey_details.users where id =${userId}`);
+    if (userRole.length !== 0) {
+      if (userRole[0].user_role == 'admin') {
+        const result = await query(`SELECT * from survey_details.surveys where userId =${userId}`);
+        if (result.length !== 0) {
+          return res.send({ resultCode: 200, resultMessage: "Survey details", responseData: result });
+
+        }
+        return res.send({ resultCode: 201, resultMessage: "Survey details not found" });
+      } else {
+
+        const result = await query(`SELECT * from survey_details.surveys`);
+        if (result.length !== 0) {
+          return res.send({ resultCode: 200, resultMessage: "Survey details", responseData: result });
+
+        }
+        return res.send({ resultCode: 201, resultMessage: "Survey details not found" });
+ 
+      }
+    }else{
+      return res.send({ resultCode: 201, resultMessage: "Invalid User" });
 
     }
-    return res.send({ resultCode: 201, resultMessage: "InValid user" });
 
   } catch (error) {
     throw error;
@@ -73,7 +92,13 @@ exports.surveyDetailsBySurveyId = async (req, res) => {
     if (checkSurvey.length == 0) {
       return res.send({ resultCode: 200, resultMessage: "Survey Details not found" });
     }
-    const surveyQuestions = await query(`SELECT * from survey_details.surveyquestions where surveyId=${surveyId}`);
+    const surveyQuestions = await query(`SELECT sq.id,sq.surveyquestion_type,sq.surveyquestion_text,sqa.surveyquestion_answer
+    from survey_details.surveyquestions sq INNER JOIN survey_details.surveyquestionanswers
+     sqa on sq.id = sqa.surveyquestionsId where sq.surveyId=${surveyId}`);
+
+     surveyQuestions.map(data =>{
+       data.surveyquestion_answer=data.surveyquestion_answer.split(",")
+     })
 
     return res.send({ resultCode: 200, resultMessage: "Survey Details", SurveyDetails: checkSurvey, QuestionDetails: surveyQuestions });
 
@@ -86,7 +111,6 @@ exports.deleteSurveyById = async (req, res) => {
   const { surveyId } = req.body;
 
   try {
-    console.log("surveyId", surveyId);
     let result = {};
 
     await query(`delete from survey_details.surveyquestions where surveyId in (${surveyId})`);
