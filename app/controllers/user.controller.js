@@ -35,8 +35,8 @@ exports.create = async (req, res) => {
       return res.send({ resultCode: 201,resultMessage:`Email Id ${userEmail} is already exist,Please use another mail id` });
     }
     const insertRecord = await query(`INSERT into survey_details.users
-    (user_Email,user_Password,user_Firstname,user_Lastname,createdAt,updatedAt)values
-    ('${email}','${userPassword}','${userFirstName}','${userLastName}','${finalDate}','${finalDate}')`);
+    (user_Email,user_Password,user_Firstname,user_Lastname,createdAt,updatedAt,user_role)values
+    ('${email}','${userPassword}','${userFirstName}','${userLastName}','${finalDate}','${finalDate}','admin')`);
 
     if (insertRecord.affectedRows === 1) {
       return res.send({ resultCode: 200,resultMessage:"Sign up Successful", responseData:{userId: insertRecord.insertId }});
