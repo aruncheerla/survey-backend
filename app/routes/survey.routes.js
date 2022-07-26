@@ -13,6 +13,7 @@ module.exports = () => {
     router.route('/surveyList').get(controller.surveyList); 
     router.route('/surveyDetailsBySurveyId').post(controller.surveyDetailsBySurveyId); 
     router.route('/deleteSurveyById').delete(controller.deleteSurveyById); 
+    router.route('/updateSurvey').put(controller.updateSurvey); 
 
-    return router;
+    return router;  
 };
