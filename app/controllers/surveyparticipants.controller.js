@@ -79,15 +79,15 @@ exports.bulkCreateSurveyParticipant = async (req, res) => {
     let transport = nodemailer.createTransport({
       host: "smtp.gmail.com",
       auth: {
-        user: 'supraja.kattegummula@eagles.oc.edu',
-        pass: 'pxzofeukktwqzjya'
+        user: 'surveysproject1997@gmail.com',
+        pass: 'vupvsiovkhwpgtzv'
       }
    });
    const link =`http://localhost:3001/surveyForm?surveyId=${surveyId}`
     var mailOptions = {
-      from: 'onkarkale34@gmail.com',
+      from: 'surveysproject1997@gmail.com',
       to: emailString,
-      subject: 'Sending Email using Node.js',
+      subject: 'Sending Email for Survey',
       text: `Please fill below survey form ${link}`
 
     };
@@ -108,4 +108,6 @@ exports.bulkCreateSurveyParticipant = async (req, res) => {
   }
 
 };
+
+
 
