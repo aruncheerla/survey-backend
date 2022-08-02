@@ -4,7 +4,7 @@
   "description": "Tutorial Node.js with Rest API",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [
     "node.js",
@@ -24,6 +24,10 @@
     "nodemailer": "^6.7.7",
     "nodemon": "^2.0.19",
     "sequelize": "^6.19.0",
+    "supertest": "^6.2.3",
     "util": "^0.12.4"
+  },
+  "devDependencies": {
+    "jest": "^28.1.3"
   }
 }
