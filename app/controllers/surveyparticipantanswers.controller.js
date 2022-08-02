@@ -49,6 +49,7 @@ exports.getSurveyParticipantAnswers = async (req, res) => {
   const { surveyId } = req.query;
 
   try {
+
     const surveyParticipantAns = await query(`select count(1) as count,spa.surveyparticipantanswer_text,spa.surveyquestionsId,sq.surveyquestion_text  from 
     survey_details.surveyparticipantanswers spa inner join surveyquestions sq on spa.surveyquestionsId=sq.id  where sq.surveyId=${surveyId} group by surveyparticipantanswer_text`);
     if (surveyParticipantAns.length !==0) {
@@ -78,14 +79,28 @@ exports.getSurveyParticipantAnswers = async (req, res) => {
         }
 
       });
-
+      const questionIdArray=[]
       result.map(data => {
+        questionIdArray.push(data.surveyquestionsId);
         data.questionAns.map(res => {
           res.percentage = ((100 * res.count) / data.totalCount).toFixed(2);
 
         })
 
       })
+      let remainingQuestions = await query(`select * from survey_details.surveyquestions where id NOT IN (${questionIdArray}) and surveyId = ${surveyId}`) 
+      if(remainingQuestions.length !==0)
+      {
+        remainingQuestions && remainingQuestions.map(data =>{
+          let obj = {
+            surveyquestion_text: data.surveyquestion_text,
+            surveyquestionsId: data.id,
+            questionAns: [{ percentage: 0 }]
+          }
+
+        result.push(obj);
+        })
+      }
       return res.send({ resultCode: 200, resultMessage: "Survey answer details", responseData: result });
 
     }

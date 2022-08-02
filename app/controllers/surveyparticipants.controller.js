@@ -79,15 +79,15 @@ exports.bulkCreateSurveyParticipant = async (req, res) => {
     let transport = nodemailer.createTransport({
       host: "smtp.gmail.com",
       auth: {
-        user: 'surveysproject1997@gmail.com',
-        pass: 'vupvsiovkhwpgtzv'
+        user: process.env.EMAIL_ID,
+        pass: process.env.EMAIL_PASSWORD
       }
    });
-   const link =`http://localhost:3001/surveyForm?surveyId=${surveyId}`
+   const link = process.env.NODE_ENV == 'local' ?`http://localhost:3001/surveyForm?surveyId=${surveyId}`:`${process.env.SURVEY_FORM_URL}?surveyId=${surveyId}`;
     var mailOptions = {
-      from: 'surveysproject1997@gmail.com',
+      from: 'onkarkale34@gmail.com',
       to: emailString,
-      subject: 'Sending Email for Survey',
+      subject: 'Sending Email using Node.js',
       text: `Please fill below survey form ${link}`
 
     };

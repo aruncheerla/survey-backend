@@ -65,3 +65,29 @@ exports.login = async (req, res) => {
     throw error;
   }
 }
+
+exports.getUserList = async (req, res) => {
+  const { limit, offset,userId } = req.query;
+
+  try {
+    const userRole = await query(`SELECT user_role  from survey_details.users where id=${userId}`);
+    console.log('userRole',userRole);
+    if(userRole[0].user_role == 'super_admin')
+    {
+    const totalRecord = await query(`SELECT count(1) as totalcount  from survey_details.users `);
+    if (totalRecord[0].totalcount !== 0) {
+      const result = await query(`SELECT id,user_Email,user_Firstname,user_Lastname,user_role from survey_details.users LIMIT ${limit} OFFSET ${offset}`);
+      return res.send({ resultCode: 200, resultMessage: "User details",totalCount:totalRecord[0].totalcount, responseData: result });
+
+    }
+    return res.send({ resultCode: 201, resultMessage: "User details not found" });
+
+  }
+  return res.send({ resultCode: 201, resultMessage: "You can't access this page" });
+
+  } catch (error) {
+    console.log("error", error);
+    throw error;
+  }
+}
+

@@ -50,23 +50,26 @@ exports.createSurvey = async (req, res) => {
 };
 
 exports.surveyList = async (req, res) => {
-  const { userId } = req.query;
+  const { userId,limit,offset } = req.query;
   try {
-
-    const userRole = await query(`SELECT user_role from survey_details.users where id =${userId}`);
+    const userRole = await query(`SELECT user_role from survey_details.users where id =${userId} `);
     if (userRole.length !== 0) {
       if (userRole[0].user_role == 'admin') {
-        const result = await query(`SELECT * from survey_details.surveys where userId =${userId}`);
+        const result = await query(`SELECT * from survey_details.surveys where userId =${userId} LIMIT ${limit} OFFSET ${offset} `);
+        const totalCount =await query(`SELECT Count(1) as totalcount from survey_details.surveys where userId =${userId}`); 
+
         if (result.length !== 0) {
-          return res.send({ resultCode: 200, resultMessage: "Survey details", responseData: result });
+          return res.send({ resultCode: 200, resultMessage: "Survey details", totalCount:totalCount[0].totalcount ,responseData: result });
 
         }
         return res.send({ resultCode: 201, resultMessage: "Survey details not found" });
       } else {
 
-        const result = await query(`SELECT * from survey_details.surveys`);
+        const result = await query(`SELECT * from survey_details.surveys LIMIT ${limit} OFFSET ${offset}`);
+        const totalCount =await query(`SELECT Count(1) as totalcount from survey_details.surveys`); 
+
         if (result.length !== 0) {
-          return res.send({ resultCode: 200, resultMessage: "Survey details", responseData: result });
+          return res.send({ resultCode: 200, resultMessage: "Survey details",totalCount:totalCount[0].totalcount, responseData: result });
 
         }
         return res.send({ resultCode: 201, resultMessage: "Survey details not found" });
@@ -90,7 +93,7 @@ exports.surveyDetailsBySurveyId = async (req, res) => {
     const checkSurvey = await query(`SELECT * from survey_details.surveys where id=${surveyId}`);
 
     if (checkSurvey.length == 0) {
-      return res.send({ resultCode: 200, resultMessage: "Survey Details not found" });
+      return res.send({ resultCode: 201, resultMessage: "Survey Details not found" });
     }
     const surveyQuestions = await query(`SELECT sq.id,sq.surveyquestion_type,sq.surveyquestion_text,sqa.surveyquestion_answer
     from survey_details.surveyquestions sq INNER JOIN survey_details.surveyquestionanswers
